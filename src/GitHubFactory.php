@@ -12,6 +12,7 @@
 namespace GrahamCampbell\GitHub;
 
 use Github\Client;
+use Github\HttpClient\HttpClient;
 use Github\HttpClient\CachedHttpClient;
 use GrahamCampbell\GitHub\Authenticators\AuthenticatorFactory;
 
@@ -68,7 +69,7 @@ class GitHubFactory
      *
      * @param string[] $config
      *
-     * @return \Github\HttpClient\CachedHttpClient
+     * @return \Github\HttpClient\HttpClient
      */
     protected function getHttpClient(array $config)
     {
@@ -78,18 +79,22 @@ class GitHubFactory
             'cache_dir'   => $this->path,
         ];
 
-        return new CachedHttpClient($options);
+        if (array_get($config, 'noCache', false)) {
+            return new HttpClient($options);
+        } else {
+            return new CachedHttpClient($options);
+        }
     }
 
     /**
      * Get the main client.
      *
-     * @param \Github\HttpClient\CachedHttpClient $http
-     * @param string[]                            $config
+     * @param \Github\HttpClient\HttpClient $http
+     * @param string[]                      $config
      *
      * @return \Github\Client
      */
-    protected function getClient(CachedHttpClient $http, array $config)
+    protected function getClient(HttpClient $http, array $config)
     {
         $client = new Client($http);
 
